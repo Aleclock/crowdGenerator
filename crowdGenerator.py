@@ -83,11 +83,7 @@ def createUI( windowTitle, pApplyCallback ):
 
     tab_crowdCreation = cmds.rowColumnLayout( numberOfColumns=5, columnWidth=[(1,10),(2, 60), (3, 60), (4, 60),(5,10)] )
 
-    cmds.separator(h=10, style="none")
-    cmds.separator(h=10, style="none")
-    cmds.separator(h=10, style="none")
-    cmds.separator(h=10, style="none")
-    cmds.separator(h=10, style="none")
+    addSeparator(5, 10) # number of separator, height
 
     cmds.separator(h=10, style="none")
     cmds.text (label = "Materials")
@@ -95,11 +91,7 @@ def createUI( windowTitle, pApplyCallback ):
     cmds.button (label = "Delete", command= deleteMaterialsCallback )
     cmds.separator( h=10, style='none' )
 
-    cmds.separator(h=2, style="none")
-    cmds.separator(h=2, style="none")
-    cmds.separator(h=2, style="none")
-    cmds.separator(h=2, style="none")
-    cmds.separator(h=2, style="none")
+    addSeparator(5,2)
 
     cmds.separator(h=10, style="none")
     cmds.text (label = "Models")
@@ -119,11 +111,7 @@ def createUI( windowTitle, pApplyCallback ):
     cmds.separator( h=10, style='none' )
     cmds.separator( h=10, style='none' )
 
-    cmds.separator(h=10, style="none")
-    cmds.separator(h=10, style="none")
-    cmds.separator(h=10, style="none")
-    cmds.separator(h=10, style="none")
-    cmds.separator(h=10, style="none")
+    addSeparator(5,10)
 
     cmds.separator( h=10, style='none' )
     cmds.separator(h=10, style="none")
@@ -131,11 +119,7 @@ def createUI( windowTitle, pApplyCallback ):
                                                         nRowsField,
                                                         nSeatsField ))  
 
-    cmds.separator(h=10, style="none")
-    cmds.separator(h=10, style="none")
-    cmds.separator(h=10, style="none")
-    cmds.separator(h=10, style="none")
-    cmds.separator(h=10, style="none")
+    addSeparator(5,10)
     
     cmds.setParent( '..' )
 
@@ -186,6 +170,10 @@ def deleteMaterials():
         cmds.delete(skinList)
         skinList = []
 
+def addSeparator(n, height):
+    for i in range(n):
+        cmds.separator(h=height, style="none")
+
 createUI("Crowd generator", applyCallback)
 
 def drawModels (nRows, nSeats):
@@ -226,32 +214,25 @@ def drawModels (nRows, nSeats):
             mHair = getRandomElement(mHair)
             setMaterial(rowGroup + ' | ' + body + '|body|head|hair*' ,mHair)
 
-            rigReference = 'viewer_' + str(count+1) + "|QuickRigCharacter_Ctrl_Reference"
+            #rigReference = 'viewer_' + str(count+1) + "|QuickRigCharacter_Ctrl_Reference"
 
-            # TODO il rig reference è formato da queste cose qua sotto
-            """select -r joint_COG ;
-            select -r joint_COG ikHandle_foot_L ;
-            select -r joint_COG ikHandle_foot_L ikHandle_hand_L ;
-            select -r joint_COG ikHandle_foot_L ikHandle_hand_L ikHandle_hand_R ;
-            select -r joint_COG ikHandle_foot_L ikHandle_hand_L ikHandle_hand_R ikHandle_head ;
-            select -r joint_COG ikHandle_foot_L ikHandle_hand_L ikHandle_hand_R ikHandle_head ikHandle_foot_R ;
-            select -add hair2 ;
-            doCreateParentConstraintArgList 1 { "1","0","0","0","0","0","0","0","1","","1" };
-            parentConstraint -mo -weight 1
-            """
+            
+            cmds.parentConstraint ("viewer_" + str(count+1) + "|joint_COG|joint_spine|joint_neck", rowGroup + ' | ' + body + '|body|head|hair*', maintainOffset = True, weight = True)
+
+            selectRig('viewer_' + str(count+1))
 
             # TODO dopo aver selezionaro il rif reference è necessario selezionare hari* e fare parentConstraint
 
-            cmds.parentConstraint (rigReference, rowGroup + ' | ' + body + '|body|head|hair*', maintainOffset = True, weight = True)
+            """cmds.parentConstraint (rigReference, rowGroup + ' | ' + body + '|body|head|hair*', maintainOffset = True, weight = True)
 
             # Viene selezionato il Rig in quanto selezionando il gruppo lo spostamento viene male
-            cmds.select(rigReference, visible= True)
+            cmds.select(rigReference, visible= True)"""
 
             x = random.uniform(-0.5, 0.5) + (6 * j)
             y = 3 * i
             z = random.uniform(-0.5, 0.5) + (-3 * i)
             
-            cmds.move(x,y,z) 
+            cmds.move(x,y,z, r = True)
             
             count = count + 1
         cmds.xform(rowGroup,centerPivots=True)
@@ -278,3 +259,26 @@ def uvMapskinFace(rowGroup, body):
     cmds.polyEditUV( uValue=0, vValue=0.34) 
     cmds.setAttr (rowGroup + ' | ' + body + '|body|head|headShape.uvPivot',0.5, 0.45, type='double2')
     cmds.polyEditUV(pivotU = 0.5, pivotV = 0.45, scaleU=3.5, scaleV=3.5)
+
+"""
+Select rig of path model
+Input:
+    path: path of model (rig root)
+"""
+def selectRig(path):
+    #cmds.select(cl = True) # cl: clear
+    cmds.select(path + "|joint_COG", visible = False) # r: replace
+    cmds.select(path + "|ikHandle_foot_L", visible = True, add = True)
+    cmds.select(path + "|ikHandle_foot_R", visible = True, add = True)
+    cmds.select(path + "|ikHandle_hand_L", visible = True, add = True)
+    cmds.select(path + "|ikHandle_hand_R", visible = True, add = True)
+    cmds.select(path + "|ikHandle_head", visible = True, add = True)
+    """
+    select -cl  ;
+    select -r viewer_6|joint_COG ;
+    select -add viewer_6|ikHandle_foot_L ;
+    select -add viewer_6|ikHandle_hand_L ;
+    select -add viewer_6|ikHandle_hand_R ;
+    select -add viewer_6|ikHandle_head ;
+    select -add viewer_6|ikHandle_foot_R ;
+    """

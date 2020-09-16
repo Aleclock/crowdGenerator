@@ -4,8 +4,7 @@ import functools
 import random
 import pymel.core as pm
 
-os.chdir("/Users/aleclock/Desktop/uni/ModGraf")
-# TODO sostituire i vari percorsi con una variabile per rendere il tutto più modificabile
+os.chdir("/Users/aleclock/Desktop/uni/ModGraf") # Go to path
 
 # ----------------------------------------------------------------------------------------------------------------
 # Funzione per la creazione dell'interfaccia grafica
@@ -102,19 +101,16 @@ def createUI( windowTitle, pApplyCallback ):
     cmds.separator( h=10, style='none' )
     cmds.text (label = "Rows:")
     nRowsField = cmds.intField(minValue=1, value=4)
-    cmds.separator(h=10, style="none")
-    cmds.separator(h=10, style="none")
+    addSeparator(2, 10)
     
     cmds.separator( h=10, style='none' )
     cmds.text (label = "Seats:")
     nSeatsField = cmds.intField(minValue=10, value=15)
-    cmds.separator( h=10, style='none' )
-    cmds.separator( h=10, style='none' )
+    addSeparator(2, 10)
 
     addSeparator(5,10)
 
-    cmds.separator( h=10, style='none' )
-    cmds.separator(h=10, style="none")
+    addSeparator(2, 10)
     cmds.button (label = "Apply", command = functools.partial ( pApplyCallback,
                                                         nRowsField,
                                                         nSeatsField ))  
@@ -123,14 +119,12 @@ def createUI( windowTitle, pApplyCallback ):
     
     cmds.setParent( '..' )
 
-
     tab_crowdAnimation = cmds.rowColumnLayout(numberOfColumns=2, columnWidth=[(1,100),(2,100)])
-    cmds.separator(h=10, style="none")  
-    cmds.separator(h=10, style="none")  
+    addSeparator(2, 10)
     cmds.text (label = "Wave")
-    cmds.button( label='Create', command=cancelCallback)
+    cmds.button( label='Create', command = animWaveCallback)
     cmds.text (label = "Exulting")
-    cmds.button( label='Create', command=cancelCallback)
+    cmds.button( label='Create', command = animExultanceCallback)
     cmds.setParent( '..' )
 
     cmds.tabLayout( tabs, edit=True, tabLabel=((tab_crowdCreation, 'Crowd creation'), (tab_crowdAnimation, 'Animation')) )
@@ -143,8 +137,22 @@ def applyCallback(nRowsField, nSeatsField, *pArgs):
     deleteElements("row_group*")
     #TODO capire perchè elimino i capelli
     deleteElements("hair_*")
-
     drawModels(nRows, nSeats)
+
+def animWaveCallback(*pArgs):
+
+    viewer_list = cmds.ls("viewer*")
+    anim_folder  = r"./src/animation"
+
+    #haircutModel = cmds.getFileList(folder = folderHair, filespec = "*.%s" % fileType)
+    haircutModel = cmds.getFileList(folder = anim_folder, filespec='atom')
+    # TODO arrivato qui, non riesce a trovare i file .atom
+    print (haircutModel)
+    #for viewer in viewer_list:
+    # TODO set animation
+
+def animExultanceCallback(*pArgs):
+    print ("ciao exultance")
 
 # Funzione che importa i vari modelli
 def importModels(model, folder, ns):    # ns: namespace
@@ -170,8 +178,9 @@ def deleteMaterials():
         cmds.delete(skinList)
         skinList = []
 
+# Add multiple separator
 def addSeparator(n, height):
-    for i in range(n):
+    for _ in range(n):
         cmds.separator(h=height, style="none")
 
 createUI("Crowd generator", applyCallback)
@@ -233,6 +242,7 @@ def drawModels (nRows, nSeats):
             z = random.uniform(-0.5, 0.5) + (-3 * i)
             
             cmds.move(x,y,z, r = True)
+            freezeIkTransformation('viewer_' + str(count+1))
             
             count = count + 1
         cmds.xform(rowGroup,centerPivots=True)
@@ -267,18 +277,66 @@ Input:
 """
 def selectRig(path):
     #cmds.select(cl = True) # cl: clear
-    cmds.select(path + "|joint_COG", visible = False) # r: replace
+    cmds.select(path + "|joint_COG", visible = False)
     cmds.select(path + "|ikHandle_foot_L", visible = True, add = True)
     cmds.select(path + "|ikHandle_foot_R", visible = True, add = True)
     cmds.select(path + "|ikHandle_hand_L", visible = True, add = True)
     cmds.select(path + "|ikHandle_hand_R", visible = True, add = True)
     cmds.select(path + "|ikHandle_head", visible = True, add = True)
-    """
-    select -cl  ;
-    select -r viewer_6|joint_COG ;
-    select -add viewer_6|ikHandle_foot_L ;
-    select -add viewer_6|ikHandle_hand_L ;
-    select -add viewer_6|ikHandle_hand_R ;
-    select -add viewer_6|ikHandle_head ;
-    select -add viewer_6|ikHandle_foot_R ;
-    """
+
+"""
+Select all the Ik handle, so the rig withoud COG
+Input:
+    path: path of model (rig root)
+"""
+def selectIkHandle(path):
+    cmds.select(path + "|ikHandle_foot_L", visible = True)
+    cmds.select(path + "|ikHandle_foot_R", visible = True, add = True)
+    cmds.select(path + "|ikHandle_hand_L", visible = True, add = True)
+    cmds.select(path + "|ikHandle_hand_R", visible = True, add = True)
+    cmds.select(path + "|ikHandle_head", visible = True, add = True)
+
+"""
+Freeze transformation of ik handle
+Input:
+    path: path of model
+
+https://download.autodesk.com/global/docs/maya2012/en_us/CommandsPython/makeIdentity.html
+"""
+def freezeIkTransformation(path):
+    selectIkHandle(path)
+    cmds.makeIdentity(apply=True, translate=True , rotate = True, scale = False, normal = False)
+
+    
+
+"""
+IMPORT ANIMAZION
+select -r ikHandle_foot_L ;
+select -add ikHandle_hand_L ;
+select -add ikHandle_hand_R ;
+select -add ikHandle_head ;
+select -add ikHandle_foot_R ;
+file -import -type "atomImport" -ra true -namespace "anim" -options ";;targetTime=1;srcTime=1:6;dstTime=1:6;option=scaleInsert;match=hierarchy;;selected=selectedOnly;search=;replace=;prefix=;suffix=;mapFile=/Users/aleclock/Documents/maya/projects/default/data/;" "/Users/aleclock/Desktop/anim.atom";
+
+FREEZE TRANSFORMATION (ROTATION AND TRANSLATION)
+
+select -r viewer_6|ikHandle_foot_L ;
+select -add viewer_6|ikHandle_hand_L ;
+select -add viewer_6|ikHandle_hand_R ;
+select -add viewer_6|ikHandle_head ;
+select -add viewer_6|ikHandle_foot_R ;
+makeIdentity -apply true -t 1 -r 1 -s 0 -n 0 -pn 1;
+
+
+
+IN TEORIA QUESTO FUNZIONA 
+
+select -r viewer_3|ikHandle_foot_L ;
+select -add viewer_3|ikHandle_hand_L ;
+select -add viewer_3|ikHandle_hand_R ;
+select -add viewer_3|ikHandle_head ;
+select -add viewer_3|ikHandle_foot_R ;
+makeIdentity -apply true -t 1 -r 1 -s 0 -n 0 -pn 1;     # Permette di fare freeze transformation
+file -import -type "atomImport" -ra true -namespace "anim_row_group" -options ";;targetTime=1;srcTime=1:12;dstTime=1:12;option=scaleInsert;match=hierarchy;;selected=selectedOnly;search=;replace=;prefix=;suffix=;mapFile=/Users/aleclock/Documents/maya/projects/default/data/;" "/Users/aleclock/Desktop/anim_row_group.atom";
+"""
+

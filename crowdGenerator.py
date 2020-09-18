@@ -4,7 +4,7 @@ import functools
 import random
 import pymel.core as pm
 
-os.chdir("/Users/aleclock/Desktop/uni/ModGraf") # Go to path
+os.chdir("/Users/aleclock/Desktop/uni/ModGraf/crowdGenerator") # Go to path
 
 # ----------------------------------------------------------------------------------------------------------------
 # Funzione per la creazione dell'interfaccia grafica
@@ -142,12 +142,12 @@ def applyCallback(nRowsField, nSeatsField, *pArgs):
 def animWaveCallback(*pArgs):
 
     viewer_list = cmds.ls("viewer*")
+    fileType = "atom"
     anim_folder  = r"./src/animation"
+    animList = cmds.getFileList(folder = anim_folder, filespec = "*.%s" % fileType) # list of animation files 
 
-    #haircutModel = cmds.getFileList(folder = folderHair, filespec = "*.%s" % fileType)
-    haircutModel = cmds.getFileList(folder = anim_folder, filespec='atom')
-    # TODO arrivato qui, non riesce a trovare i file .atom
-    print (haircutModel)
+    for v in viewer_list:
+        setAnimation(v, anim_folder + "/" + str(getRandomElement(animList)))
     #for viewer in viewer_list:
     # TODO set animation
 
@@ -262,7 +262,6 @@ def setMaterial(path, material):
 def uvMapskinFace(rowGroup, body):
     #cmds.hilite(cube)
     cmds.polyMapDel(rowGroup + ' | ' + body + '|body|head.f[0:71]', constructionHistory=True)
-    #cmds.polyMapDel(rowGroup + ' | ' + body + '|body|head.f[0:71]', constructionHistory=True)
     cmds.polyMapDel(rowGroup + ' | ' + body + '|body|head.f[73:293]', constructionHistory=True)
     cmds.polyMapDel(rowGroup + ' | ' + body + '|body|head|hair.f[0:25]', constructionHistory=True)
     cmds.select(rowGroup + ' | ' + body + '|body|head.f[72]', r= True)
@@ -301,23 +300,6 @@ Freeze transformation of ik handle
 Input:
     path: path of model
 
-https://download.autodesk.com/global/docs/maya2012/en_us/CommandsPython/makeIdentity.html
-"""
-def freezeIkTransformation(path):
-    selectIkHandle(path)
-    cmds.makeIdentity(apply=True, translate=True , rotate = True, scale = False, normal = False)
-
-    
-
-"""
-IMPORT ANIMAZION
-select -r ikHandle_foot_L ;
-select -add ikHandle_hand_L ;
-select -add ikHandle_hand_R ;
-select -add ikHandle_head ;
-select -add ikHandle_foot_R ;
-file -import -type "atomImport" -ra true -namespace "anim" -options ";;targetTime=1;srcTime=1:6;dstTime=1:6;option=scaleInsert;match=hierarchy;;selected=selectedOnly;search=;replace=;prefix=;suffix=;mapFile=/Users/aleclock/Documents/maya/projects/default/data/;" "/Users/aleclock/Desktop/anim.atom";
-
 FREEZE TRANSFORMATION (ROTATION AND TRANSLATION)
 
 select -r viewer_6|ikHandle_foot_L ;
@@ -327,16 +309,22 @@ select -add viewer_6|ikHandle_head ;
 select -add viewer_6|ikHandle_foot_R ;
 makeIdentity -apply true -t 1 -r 1 -s 0 -n 0 -pn 1;
 
-
-
-IN TEORIA QUESTO FUNZIONA 
-
-select -r viewer_3|ikHandle_foot_L ;
-select -add viewer_3|ikHandle_hand_L ;
-select -add viewer_3|ikHandle_hand_R ;
-select -add viewer_3|ikHandle_head ;
-select -add viewer_3|ikHandle_foot_R ;
-makeIdentity -apply true -t 1 -r 1 -s 0 -n 0 -pn 1;     # Permette di fare freeze transformation
-file -import -type "atomImport" -ra true -namespace "anim_row_group" -options ";;targetTime=1;srcTime=1:12;dstTime=1:12;option=scaleInsert;match=hierarchy;;selected=selectedOnly;search=;replace=;prefix=;suffix=;mapFile=/Users/aleclock/Documents/maya/projects/default/data/;" "/Users/aleclock/Desktop/anim_row_group.atom";
+https://download.autodesk.com/global/docs/maya2012/en_us/CommandsPython/makeIdentity.html
 """
+def freezeIkTransformation(path):
+    selectIkHandle(path)
+    cmds.makeIdentity(apply=True, translate=True , rotate = True, scale = False, normal = False)
 
+"""
+IMPORT ANIMAZION
+select -r ikHandle_foot_L ;
+select -add ikHandle_hand_L ;
+select -add ikHandle_hand_R ;
+select -add ikHandle_head ;
+select -add ikHandle_foot_R ;
+makeIdentity -apply true -t 1 -r 1 -s 0 -n 0 -pn 1;     # Permette di fare freeze transformation
+file -import -type "atomImport" -ra true -namespace "anim" -options ";;targetTime=1;srcTime=1:6;dstTime=1:6;option=scaleInsert;match=hierarchy;;selected=selectedOnly;search=;replace=;prefix=;suffix=;mapFile=/Users/aleclock/Documents/maya/projects/default/data/;" "/Users/aleclock/Desktop/anim.atom";
+"""
+def setAnimation(viewer, anim_name):
+    selectIkHandle(viewer)
+    cmds.file(anim_name, typ = "atomImport" , i= True, renameAll= True, namespace = ":", op = ";;targetTime=1;srcTime=1:12;dstTime=1:12;option=scaleInsert;match=hierarchy;;selected=selectedOnly;search=;replace=;prefix=;suffix=;mapFile=/Users/aleclock/Documents/maya/projects/default/data/;")

@@ -155,6 +155,7 @@ def animExultanceCallback(*pArgs):
     print ("ciao exultance")
 
 # Funzione che importa i vari modelli
+# TODO capire perchè salvo i modelli nella lista transform
 def importModels(model, folder, ns):    # ns: namespace
     transforms = []
 

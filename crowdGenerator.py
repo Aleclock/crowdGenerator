@@ -6,10 +6,9 @@ import pymel.core as pm
 
 os.chdir("/Users/aleclock/Desktop/uni/ModGraf/crowdGenerator") # Go to path
 
-# ----------------------------------------------------------------------------------------------------------------
-# Funzione per la creazione dell'interfaccia grafica
-# ----------------------------------------------------------------------------------------------------------------
-
+"""
+Create user interface
+"""
 def createUI( windowTitle, pApplyCallback ):
 
     windowID = 'myWindowID'
@@ -34,7 +33,7 @@ def createUI( windowTitle, pApplyCallback ):
         baseModel = cmds.getFileList(folder = folderPerson, filespec = "person_newModel.%s" % fileType)
         haircutModel = cmds.getFileList(folder = folderHair, filespec = "haircut*.%s" % fileType)
         
-        # Prima di importare i modelli elimina quelli già presenti
+        # Delete existing models
         deleteModelsCallback()
 
         cmds.group( em=True, name='models' )
@@ -60,6 +59,7 @@ def createUI( windowTitle, pApplyCallback ):
         #cmds.file("//Users/aleclock/Desktop/uni/ModGraf/src/material/SGskinFaceTexture.mb", type='mayaBinary', i= True, renameAll= True, mergeNamespacesOnClash=True, namespace=":", loadReferenceDepth= "all", importFrameRate= True, importTimeRange="override")
         cmds.file("./src/material/SGmBody_Tee00_07.mb", type='mayaBinary', i= True, renameAll= True, mergeNamespacesOnClash=True, namespace=":", loadReferenceDepth= "all", importFrameRate= True, importTimeRange="override")
         cmds.file("./src/material/SGmBody_Shirt00_12.mb", type='mayaBinary', i= True, renameAll= True, mergeNamespacesOnClash=True, namespace=":", loadReferenceDepth= "all", importFrameRate= True, importTimeRange="override")
+        cmds.file("./src/material/SGmBody_sweater00_04.mb", type='mayaBinary', i= True, renameAll= True, mergeNamespacesOnClash=True, namespace=":", loadReferenceDepth= "all", importFrameRate= True, importTimeRange="override")
         cmds.file("./src/material/SGmTrousers_jeans00_03.mb", type='mayaBinary', i= True, renameAll= True, mergeNamespacesOnClash=True, namespace=":", loadReferenceDepth= "all", importFrameRate= True, importTimeRange="override")
         cmds.file("./src/material/SGmTrousers_standard00_04.mb", type='mayaBinary', i= True, renameAll= True, mergeNamespacesOnClash=True, namespace=":", loadReferenceDepth= "all", importFrameRate= True, importTimeRange="override")
         cmds.file("./src/material/SGmTrousers_velvet00_05.mb", type='mayaBinary', i= True, renameAll= True, mergeNamespacesOnClash=True, namespace=":", loadReferenceDepth= "all", importFrameRate= True, importTimeRange="override")
@@ -140,19 +140,19 @@ def applyCallback(nRowsField, nSeatsField, *pArgs):
     drawModels(nRows, nSeats)
 
 def animWaveCallback(*pArgs):
+    print ("wave")
 
+
+def animExultanceCallback(*pArgs):
     viewer_list = cmds.ls("viewer*")
     fileType = "atom"
     anim_folder  = r"./src/animation"
     animList = cmds.getFileList(folder = anim_folder, filespec = "*.%s" % fileType) # list of animation files 
 
     for v in viewer_list:
+        coord = getLeftFootCoord(v)
         setAnimation(v, anim_folder + "/" + str(getRandomElement(animList)))
-    #for viewer in viewer_list:
-    # TODO set animation
-
-def animExultanceCallback(*pArgs):
-    print ("ciao exultance")
+        translateAnimationKeys(v, coord)
 
 # Funzione che importa i vari modelli
 # TODO capire perchè salvo i modelli nella lista transform
@@ -166,13 +166,22 @@ def importModels(model, folder, ns):    # ns: namespace
         imported_objects = cmds.file(fname, i=True, rnn=True, mergeNamespacesOnClash =False, namespace=ns, loadReferenceDepth='all', importFrameRate=True, type='mayaBinary') 
         transforms.append (cmds.ls(imported_objects, type='transform'))
 
-# Funzione che elimina elementi/oggetti se presenti
+"""
+Delete objects if exists
+Input:
+    el: element to delete
+"""
 def deleteElements(el):
     bodyList = cmds.ls(el)
     if len(bodyList)>0:
         cmds.delete(bodyList)
 
 # Funzione che elimina materiali se già esistenti
+"""
+Delete materials if exists
+Input:
+    
+"""
 def deleteMaterials():
     skinList = cmds.ls("skin*")
     if len(skinList)>0:
@@ -189,7 +198,7 @@ createUI("Crowd generator", applyCallback)
 def drawModels (nRows, nSeats):
 
     bodyList = cmds.ls("*:person")
-    bodyName = bodyList[0] # Prende il primo elemento della lista transforms e il primo elemento dell'elemento
+    bodyName = bodyList[0]
 
     hairList = cmds.ls("hairstyle*")
     # Ciclo per creazione di file e posti
@@ -215,7 +224,6 @@ def drawModels (nRows, nSeats):
             hairName = getRandomElement(hairList)
             hair = cmds.duplicate (hairName, name = "hair#") [0]
             cmds.parent(hair, rowGroup + ' | ' + body)
-            
             cmds.select (rowGroup + ' | ' + body + '|body|head|hair')
             cmds.select (rowGroup + ' | ' + body + '|' + hair ,add = True)
             pm.runtime.ReplaceObjects(scale = False)
@@ -225,41 +233,41 @@ def drawModels (nRows, nSeats):
             setMaterial(rowGroup + ' | ' + body + '|body|head|hair*' ,mHair)
 
             #rigReference = 'viewer_' + str(count+1) + "|QuickRigCharacter_Ctrl_Reference"
-
-            
             cmds.parentConstraint ("viewer_" + str(count+1) + "|joint_COG|joint_spine|joint_neck", rowGroup + ' | ' + body + '|body|head|hair*', maintainOffset = True, weight = True)
 
-            selectRig('viewer_' + str(count+1))
-
-            # TODO dopo aver selezionaro il rif reference è necessario selezionare hari* e fare parentConstraint
-
-            """cmds.parentConstraint (rigReference, rowGroup + ' | ' + body + '|body|head|hair*', maintainOffset = True, weight = True)
-
-            # Viene selezionato il Rig in quanto selezionando il gruppo lo spostamento viene male
-            cmds.select(rigReference, visible= True)"""
+            selectRig('viewer_' + str(count+1)) # Si seleziona il Rig in quanto selezionando il gruppo lo spostamento viene male
 
             x = random.uniform(-0.5, 0.5) + (6 * j)
             y = 3 * i
             z = random.uniform(-0.5, 0.5) + (-3 * i)
             
             cmds.move(x,y,z, r = True)
-            freezeIkTransformation('viewer_' + str(count+1))
+            #freezeIkTransformation('viewer_' + str(count+1))
             
             count = count + 1
         cmds.xform(rowGroup,centerPivots=True)
     
-    # Nasconde i modelli
-    cmds.hide('models')
+    cmds.hide('models') # Hide models
 
 def getRandomElement(sequence):
     return random.choice(sequence)
 
-# Funzione utile a settare i materiali
+"""
+Set material in path shape
+Input:
+    path: shape 
+    material: material to set
+"""
 def setMaterial(path, material):
-    cmds.select(path, r= True) # Selezione della testa del personaggio corrente
+    cmds.select(path, r= True)
     cmds.sets(e=1, forceElement= material)
 
-# Funzione per fare l'uv mapping del mSkinFace
+"""
+Apply uv mapping to mSkinFace material
+Input:
+    rowGroup: root of shape (group)
+    body: 
+"""
 def uvMapskinFace(rowGroup, body):
     #cmds.hilite(cube)
     cmds.polyMapDel(rowGroup + ' | ' + body + '|body|head.f[0:71]', constructionHistory=True)
@@ -325,7 +333,61 @@ select -add ikHandle_head ;
 select -add ikHandle_foot_R ;
 makeIdentity -apply true -t 1 -r 1 -s 0 -n 0 -pn 1;     # Permette di fare freeze transformation
 file -import -type "atomImport" -ra true -namespace "anim" -options ";;targetTime=1;srcTime=1:6;dstTime=1:6;option=scaleInsert;match=hierarchy;;selected=selectedOnly;search=;replace=;prefix=;suffix=;mapFile=/Users/aleclock/Documents/maya/projects/default/data/;" "/Users/aleclock/Desktop/anim.atom";
+file -import -type "atomImport" -ra true -namespace "anim_row_group01" -options ";;targetTime=3;option=insert;match=hierarchy;;selected=selectedOnly;search=;replace=;prefix=;suffix=;mapFile=/Users/aleclock/Documents/maya/projects/default/data/;" "/Users/aleclock/Desktop/uni/ModGraf/crowdGenerator/src/anim_row_group01.atom";
 """
 def setAnimation(viewer, anim_name):
+    print (anim_name)
     selectIkHandle(viewer)
-    cmds.file(anim_name, typ = "atomImport" , i= True, renameAll= True, namespace = ":", op = ";;targetTime=1;srcTime=1:12;dstTime=1:12;option=scaleInsert;match=hierarchy;;selected=selectedOnly;search=;replace=;prefix=;suffix=;mapFile=/Users/aleclock/Documents/maya/projects/default/data/;")
+    cmds.file(anim_name, type = "atomImport" , i= True, renameAll= True, namespace = ":", op =";;targetTime=3;option=insert;match=hierarchy;;selected=selectedOnly;search=;replace=;prefix=;suffix=;mapFile=/Users/aleclock/Documents/maya/projects/default/data/;")
+
+"""
+Select animation keys
+
+selectKey -clear ;
+selectKey -add -k ikHandle_foot_L_translateX2 ikHandle_hand_L_translateX2 ikHandle_hand_R_translateX2 ikHandle_foot_R_translateX2 ;
+keyframe -animation keys -relative -valueChange (0 + 12) ;
+
+Siccome il nome del ikHandle termina con l'indice del viewer meno uno, è necessario determinare l'indice e aggiungerlo alla radice del nome
+"""
+def translateAnimationKeys(viewer, coord):
+    index = int(viewer.find('_'))
+
+    if (viewer[index+1:] == "1"):
+        name = ""
+    else:
+        name = str(int(viewer[index+1:]) - 1)
+
+    selectIkHandle(viewer)
+    pm.selectKey("ikHandle_foot_L_translateX" + name, addTo = True, keyframe = True)  # https://download.autodesk.com/global/docs/Maya2012/en_US/PyMel/generated/functions/pymel.core.general/pymel.core.general.selectKey.html
+    pm.selectKey("ikHandle_foot_R_translateX" + name, addTo = True, keyframe = True)
+    pm.selectKey("ikHandle_hand_L_translateX" + name, addTo = True, keyframe = True)
+    pm.selectKey("ikHandle_hand_R_translateX" + name, addTo = True, keyframe = True)
+    #pm.selectKey("ikHandle_head_translateX" + name, addTo = True, keyframe = True)
+
+    pm.keyframe(animation = "keys", relative = True, valueChange = (0+ coord[0])) # https://help.autodesk.com/cloudhelp/2018/JPN/Maya-Tech-Docs/PyMel/generated/functions/pymel.core.animation/pymel.core.animation.keyframe.html https://download.autodesk.com/global/docs/maya2012/en_us/PyMel/generated/functions/pymel.core.animation/pymel.core.animation.keyframe.html
+
+    pm.selectKey(clear = True)
+    pm.selectKey("ikHandle_foot_L_translateY" + name, addTo = True, keyframe = True)
+    pm.selectKey("ikHandle_foot_R_translateY" + name, addTo = True, keyframe = True)
+    pm.selectKey("ikHandle_hand_L_translateY" + name, addTo = True, keyframe = True)
+    pm.selectKey("ikHandle_hand_R_translateY" + name, addTo = True, keyframe = True)
+
+    pm.keyframe(animation = "keys", relative = True, valueChange = (0+ coord[1]))
+
+    pm.selectKey(clear = True)
+    pm.selectKey("ikHandle_foot_L_translateZ" + name, addTo = True, keyframe = True)
+    pm.selectKey("ikHandle_foot_R_translateZ" + name, addTo = True, keyframe = True)
+    pm.selectKey("ikHandle_hand_L_translateZ" + name, addTo = True, keyframe = True)
+    pm.selectKey("ikHandle_hand_R_translateZ" + name, addTo = True, keyframe = True)
+
+    pm.keyframe(animation = "keys", relative = True, valueChange = (0+ coord[2]))
+
+    # TODO traslare anche la testa (mancano i keyframes nell'animazione)
+    # TODO magar provare a traslare rispetto alla media tra la posizione del piede sinistro e destro
+
+
+"""
+pm.getAttr('noseCone.translateX',lock=True)
+"""
+def getLeftFootCoord(viewer):
+    return [pm.getAttr(viewer + "|ikHandle_foot_L.translateX"), pm.getAttr(viewer + "|ikHandle_foot_L.translateY"), pm.getAttr(viewer + "|ikHandle_foot_L.translateZ")]

@@ -362,7 +362,7 @@ def translateAnimationKeys(viewer, coord):
     pm.selectKey("ikHandle_foot_R_translateX" + name, addTo = True, keyframe = True)
     pm.selectKey("ikHandle_hand_L_translateX" + name, addTo = True, keyframe = True)
     pm.selectKey("ikHandle_hand_R_translateX" + name, addTo = True, keyframe = True)
-    #pm.selectKey("ikHandle_head_translateX" + name, addTo = True, keyframe = True)
+    pm.selectKey("ikHandle_head_translateX" + name, addTo = True, keyframe = True)
 
     pm.keyframe(animation = "keys", relative = True, valueChange = (0+ coord[0])) # https://help.autodesk.com/cloudhelp/2018/JPN/Maya-Tech-Docs/PyMel/generated/functions/pymel.core.animation/pymel.core.animation.keyframe.html https://download.autodesk.com/global/docs/maya2012/en_us/PyMel/generated/functions/pymel.core.animation/pymel.core.animation.keyframe.html
 
@@ -371,6 +371,7 @@ def translateAnimationKeys(viewer, coord):
     pm.selectKey("ikHandle_foot_R_translateY" + name, addTo = True, keyframe = True)
     pm.selectKey("ikHandle_hand_L_translateY" + name, addTo = True, keyframe = True)
     pm.selectKey("ikHandle_hand_R_translateY" + name, addTo = True, keyframe = True)
+    pm.selectKey("ikHandle_head_translateY" + name, addTo = True, keyframe = True)
 
     pm.keyframe(animation = "keys", relative = True, valueChange = (0+ coord[1]))
 
@@ -379,10 +380,10 @@ def translateAnimationKeys(viewer, coord):
     pm.selectKey("ikHandle_foot_R_translateZ" + name, addTo = True, keyframe = True)
     pm.selectKey("ikHandle_hand_L_translateZ" + name, addTo = True, keyframe = True)
     pm.selectKey("ikHandle_hand_R_translateZ" + name, addTo = True, keyframe = True)
+    pm.selectKey("ikHandle_head_translateZ" + name, addTo = True, keyframe = True)
 
     pm.keyframe(animation = "keys", relative = True, valueChange = (0+ coord[2]))
-
-    # TODO traslare anche la testa (mancano i keyframes nell'animazione)
+    
     # TODO magar provare a traslare rispetto alla media tra la posizione del piede sinistro e destro
 
 

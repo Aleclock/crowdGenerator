@@ -15,14 +15,29 @@ def createUI( windowTitle, pApplyCallback ):
 
     if cmds.window( windowID, exists=True ):
         cmds.deleteUI( windowID )
-           
-    window = cmds.window (title= windowTitle,sizeable=False)
 
-    form = cmds.formLayout()
-    tabs = cmds.tabLayout(innerMarginWidth=5, innerMarginHeight=5)
-    #cmds.formLayout( form, edit=True, attachForm=((tabs, 'top', 0), (tabs, 'left', 0), (tabs, 'bottom', 0), (tabs, 'right', 0)) )
-    cmds.formLayout(form,edit= True)
+    # Callback per il caricamento dei materiali
+    def loadMaterialsCallback( *pArgs ):
+        cmds.file("./src/material/SGmComplete.mb", type='mayaBinary', i= True, renameAll= True, mergeNamespacesOnClash=True, namespace=":", loadReferenceDepth= "all", importFrameRate= True, importTimeRange="override")
+        """cmds.file("./src/material/SGmSkinFace.mb", type='mayaBinary', i= True, renameAll= True, mergeNamespacesOnClash=True, namespace=":", loadReferenceDepth= "all", importFrameRate= True, importTimeRange="override")
+        cmds.file("./src/material/SGmHair00_08.mb", type='mayaBinary', i= True, renameAll= True, mergeNamespacesOnClash=True, namespace=":", loadReferenceDepth= "all", importFrameRate= True, importTimeRange="override")
+        cmds.file("./src/material/SGmBody_Tee00_07.mb", type='mayaBinary', i= True, renameAll= True, mergeNamespacesOnClash=True, namespace=":", loadReferenceDepth= "all", importFrameRate= True, importTimeRange="override")
+        cmds.file("./src/material/SGmBody_Shirt00_12.mb", type='mayaBinary', i= True, renameAll= True, mergeNamespacesOnClash=True, namespace=":", loadReferenceDepth= "all", importFrameRate= True, importTimeRange="override")
+        cmds.file("./src/material/SGmBody_sweater00_04.mb", type='mayaBinary', i= True, renameAll= True, mergeNamespacesOnClash=True, namespace=":", loadReferenceDepth= "all", importFrameRate= True, importTimeRange="override")
+        cmds.file("./src/material/SGmTrousers_jeans00_03.mb", type='mayaBinary', i= True, renameAll= True, mergeNamespacesOnClash=True, namespace=":", loadReferenceDepth= "all", importFrameRate= True, importTimeRange="override")
+        cmds.file("./src/material/SGmTrousers_standard00_04.mb", type='mayaBinary', i= True, renameAll= True, mergeNamespacesOnClash=True, namespace=":", loadReferenceDepth= "all", importFrameRate= True, importTimeRange="override")
+        cmds.file("./src/material/SGmTrousers_velvet00_05.mb", type='mayaBinary', i= True, renameAll= True, mergeNamespacesOnClash=True, namespace=":", loadReferenceDepth= "all", importFrameRate= True, importTimeRange="override")"""
 
+        # Callback per la rimozione dei materiali
+    def deleteMaterialsCallback( *pArgs ):
+        #TODO eliminare quelli giusti
+        deleteElements("faceTexture*")
+        deleteElements("mSkin*")
+        deleteElements("mSkinFace*")
+        deleteElements("mTee*")
+        deleteElements("trousers_velvet*")
+        deleteElements("place2dTexture*")
+    
     # Callback per il caricamento dei modelli
     def loadModelsCallback( *pArgs ):
         # Variabili per l'import del modello
@@ -50,85 +65,75 @@ def createUI( windowTitle, pApplyCallback ):
         deleteElements("models")
         deleteElements("row_group*")
         deleteElements("hair*")
+        
+    with pm.window(title= windowTitle ,sizeable=True):
+        with pm.rowColumnLayout():
+            with pm.frameLayout(label='Crowd creation', font = "boldLabelFont"):
+                with pm.rowColumnLayout(numberOfColumns=5, columnWidth=[(1,10),(2, 60), (3, 60), (4, 60),(5,10)]):
+                    addSeparator(5, 10) # number of separator, height
+                    
+                    cmds.separator(h=10, style="none")
+                    cmds.text (label = "Materials", align = "left")
+                    cmds.button (label = "Load", command= loadMaterialsCallback )
+                    cmds.button (label = "Delete", command= deleteMaterialsCallback )
+                    cmds.separator( h=10, style='none' )
+                    
+                    addSeparator(5,2)
+                    
+                    cmds.separator(h=10, style="none")
+                    cmds.text (label = "Models", align = "left")
+                    cmds.button (label = "Load", command= loadModelsCallback )
+                    cmds.button (label = "Delete", command= deleteModelsCallback )
+                    cmds.separator( h=10, style='none' )
+                    
+                    cmds.separator( h=10, style='none' )
+                    cmds.text (label = "Rows", align = "left")
+                    nRowsField = cmds.intField(minValue=1, value=4)
+                    addSeparator(2, 10)
+                    
+                    cmds.separator( h=10, style='none' )
+                    cmds.text (label = "Seats", align = "left")
+                    nSeatsField = cmds.intField(minValue=10, value=15)
+                    addSeparator(2, 10)
+                    
+                    addSeparator(5,10)
 
-    # Callback per il caricamento dei materiali
-    def loadMaterialsCallback( *pArgs ):
-        #cmds.file("/Users/aleclock/Desktop/uni/ModGraf/src/material/mskinFace.mb", type='mayaBinary', i= True, renameAll= True, mergeNamespacesOnClash=True, namespace=":", loadReferenceDepth= "all", importFrameRate= True, importTimeRange="override")
-        cmds.file("./src/material/pippo.mb", type='mayaBinary', i= True, renameAll= True, mergeNamespacesOnClash=True, namespace=":", loadReferenceDepth= "all", importFrameRate= True, importTimeRange="override")
-        cmds.file("./src/material/SGmHair00_08.mb", type='mayaBinary', i= True, renameAll= True, mergeNamespacesOnClash=True, namespace=":", loadReferenceDepth= "all", importFrameRate= True, importTimeRange="override")
-        #cmds.file("//Users/aleclock/Desktop/uni/ModGraf/src/material/SGskinFaceTexture.mb", type='mayaBinary', i= True, renameAll= True, mergeNamespacesOnClash=True, namespace=":", loadReferenceDepth= "all", importFrameRate= True, importTimeRange="override")
-        cmds.file("./src/material/SGmBody_Tee00_07.mb", type='mayaBinary', i= True, renameAll= True, mergeNamespacesOnClash=True, namespace=":", loadReferenceDepth= "all", importFrameRate= True, importTimeRange="override")
-        cmds.file("./src/material/SGmBody_Shirt00_12.mb", type='mayaBinary', i= True, renameAll= True, mergeNamespacesOnClash=True, namespace=":", loadReferenceDepth= "all", importFrameRate= True, importTimeRange="override")
-        cmds.file("./src/material/SGmBody_sweater00_04.mb", type='mayaBinary', i= True, renameAll= True, mergeNamespacesOnClash=True, namespace=":", loadReferenceDepth= "all", importFrameRate= True, importTimeRange="override")
-        cmds.file("./src/material/SGmTrousers_jeans00_03.mb", type='mayaBinary', i= True, renameAll= True, mergeNamespacesOnClash=True, namespace=":", loadReferenceDepth= "all", importFrameRate= True, importTimeRange="override")
-        cmds.file("./src/material/SGmTrousers_standard00_04.mb", type='mayaBinary', i= True, renameAll= True, mergeNamespacesOnClash=True, namespace=":", loadReferenceDepth= "all", importFrameRate= True, importTimeRange="override")
-        cmds.file("./src/material/SGmTrousers_velvet00_05.mb", type='mayaBinary', i= True, renameAll= True, mergeNamespacesOnClash=True, namespace=":", loadReferenceDepth= "all", importFrameRate= True, importTimeRange="override")
+                    addSeparator(2, 10)
+                    cmds.button (label = "Apply", command = functools.partial ( pApplyCallback, nRowsField,nSeatsField )) 
+                    cmds.button (label = "Delete", command = deleteViewerCallback)
+                    
+                    addSeparator(5,10)
+        
+                    cmds.setParent( '..' )
+                    
+            with pm.frameLayout(label='Animation', font = "boldLabelFont"): #collapsable = True
+                with pm.rowColumnLayout(numberOfColumns=4, columnWidth=[(1,40),(2, 60), (3, 60),(4,40)]):
+                    addSeparator(4, 10)
+                    
+                    cmds.separator(h=10, style="none")
+                    cmds.text (label = "Exultance", align = "left")
+                    cmds.button( label='Create', command = animExultanceCallback)
+                    addSeparator(4,10)
+        
+                    cmds.setParent( '..' )
 
-
-    # Callback per la rimozione dei materiali
-    def deleteMaterialsCallback( *pArgs ):
-        #TODO eliminare quelli giusti
-        deleteElements("faceTexture*")
-        deleteElements("mSkin*")
-        deleteElements("mSkinFace*")
-        deleteElements("mTee*")
-        deleteElements("trousers_velvet*")
-        deleteElements("place2dTexture*")
-
-    # Callback per l'eliminazione del popup/ui 
-    def cancelCallback(*pArgs):
-        if cmds.window( window, exists=True ):
-            cmds.deleteUI(window, window=True )
-
-    tab_crowdCreation = cmds.rowColumnLayout( numberOfColumns=5, columnWidth=[(1,10),(2, 60), (3, 60), (4, 60),(5,10)] )
-
-    addSeparator(5, 10) # number of separator, height
-
-    cmds.separator(h=10, style="none")
-    cmds.text (label = "Materials")
-    cmds.button (label = "Load", command= loadMaterialsCallback )
-    cmds.button (label = "Delete", command= deleteMaterialsCallback )
-    cmds.separator( h=10, style='none' )
-
-    addSeparator(5,2)
-
-    cmds.separator(h=10, style="none")
-    cmds.text (label = "Models")
-    cmds.button (label = "Load", command= loadModelsCallback )
-    cmds.button (label = "Delete", command= deleteModelsCallback )
-    cmds.separator( h=10, style='none' )
-
-    cmds.separator( h=10, style='none' )
-    cmds.text (label = "Rows:")
-    nRowsField = cmds.intField(minValue=1, value=4)
-    addSeparator(2, 10)
-    
-    cmds.separator( h=10, style='none' )
-    cmds.text (label = "Seats:")
-    nSeatsField = cmds.intField(minValue=10, value=15)
-    addSeparator(2, 10)
-
-    addSeparator(5,10)
-
-    addSeparator(2, 10)
-    cmds.button (label = "Apply", command = functools.partial ( pApplyCallback,
-                                                        nRowsField,
-                                                        nSeatsField ))  
-
-    addSeparator(5,10)
-    
-    cmds.setParent( '..' )
-
-    tab_crowdAnimation = cmds.rowColumnLayout(numberOfColumns=2, columnWidth=[(1,100),(2,100)])
-    addSeparator(2, 10)
-    cmds.text (label = "Wave")
-    cmds.button( label='Create', command = animWaveCallback)
-    cmds.text (label = "Exulting")
-    cmds.button( label='Create', command = animExultanceCallback)
-    cmds.setParent( '..' )
-
-    cmds.tabLayout( tabs, edit=True, tabLabel=((tab_crowdCreation, 'Crowd creation'), (tab_crowdAnimation, 'Animation')) )
-    cmds.showWindow()
+            with pm.frameLayout(label='Customization', font = "boldLabelFont"): #collapsable = True
+                with pm.rowColumnLayout(numberOfColumns=3, columnWidth=[(1,10),(2, 180), (3,10)]):
+                    addSeparator(4, 10)
+                    pm.text('Select item to change and click the action', wordWrap = True, align='left')
+                with pm.rowColumnLayout(numberOfColumns=4, columnWidth=[(1,40),(2, 60), (3, 60),(4,40)]):
+                    addSeparator(4, 10)
+                    
+                    cmds.separator(h=10, style="none")
+                    cmds.text (label = "Stickman")
+                    cmds.button (label = "Change", command= changeViewerCallback )
+                    addSeparator(2, 10)
+                    cmds.text (label = "Animation")
+                    cmds.button (label = "Change", command= changeAnimationCallback )
+                    cmds.separator(h=10, style="none")
+                    
+                    addSeparator(4,10)
+                    cmds.setParent( '..' )
 
 # Callback per la creazione della folla 
 def applyCallback(nRowsField, nSeatsField, *pArgs):
@@ -139,32 +144,79 @@ def applyCallback(nRowsField, nSeatsField, *pArgs):
     deleteElements("hair_*")
     drawModels(nRows, nSeats)
 
-def animWaveCallback(*pArgs):
-    print ("wave")
-
+def deleteViewerCallback(*pArgs):
+    deleteElements("row_group*")
 
 def animExultanceCallback(*pArgs):
-    viewer_list = cmds.ls("viewer*")
+    viewerList = cmds.ls("viewer*")
     fileType = "atom"
     anim_folder  = r"./src/animation"
     animList = cmds.getFileList(folder = anim_folder, filespec = "*.%s" % fileType) # list of animation files 
 
-    for v in viewer_list:
-        coord = getLeftFootCoord(v)
-        setAnimation(v, anim_folder + "/" + str(getRandomElement(animList)))
+    anim = getAnimationSequence(animList, viewerList)
+    for v in viewerList:
+        coord = getStickmanOrigin(v)
+        setAnimation(v, anim_folder + "/" + str(anim[viewerList.index(v)]))
         translateAnimationKeys(v, coord)
 
-# Funzione che importa i vari modelli
-# TODO capire perchè salvo i modelli nella lista transform
-def importModels(model, folder, ns):    # ns: namespace
-    transforms = []
+"""
+cutKey -clear -time ":" -hierarchy none -controlPoints 0 -shape 1 {"viewer_4|ikHandle_foot_L", "viewer_4|ikHandle_hand_L", "viewer_4|ikHandle_hand_R", "viewer_4|ikHandle_head", "viewer_4|ikHandle_foot_R"};
+"""
+def changeAnimationCallback(*pArgs):
+    fileType = "atom"
+    anim_folder  = r"./src/animation"
+    animList = cmds.getFileList(folder = anim_folder, filespec = "*.%s" % fileType) # list of animation files 
 
+    selected = cmds.ls (selection = True) # Selected items
+    for s in selected:
+        if s[0:6] == "viewer": # if the item selected can be animated
+            rowGroup = pm.listRelatives(s, allParents = True)[0] # Take the first (and unique) element
+            coord = getStickmanOrigin(s)
+            
+            # https://help.autodesk.com/cloudhelp/2018/JPN/Maya-Tech-Docs/PyMel/generated/functions/pymel.core.animation/pymel.core.animation.cutKey.html
+            pm.cutKey( {s + "|ikHandle_foot_L",s + "|ikHandle_hand_L",s + "|ikHandle_hand_R",s + "|ikHandle_head",s + "|ikHandle_foot_R"}, time=":", clear = True, hierarchy = "none", controlPoints = False, shape = True)
+            
+            setAnimation(s, anim_folder + "/" + str(getRandomElement(animList)))
+            #print (pm.keyframe(s + "|ikHandle_foot_L", query = True, name = True))
+
+            translateAnimationKeys(s, coord)
+            cmds.select (rowGroup + ' | ' + s)
+
+def changeViewerCallback(*pArgs):
+    selected = cmds.ls (selection = True) # Selected items
+    for s in selected:
+        if s[0:6] == "viewer": # if the item selected can be animated
+            # https://help.autodesk.com/cloudhelp/2016/ENU/Maya-Tech-Docs/PyMel/generated/classes/pymel.core.nodetypes/pymel.core.nodetypes.DagNode.html
+            rowGroup = pm.listRelatives(s, allParents = True)[0] # Take the first (and unique) element
+
+            mBody = getRandomElement(cmds.ls("SGmBody*"))
+            setMaterial(rowGroup + ' | ' + s + '|body',mBody)
+            
+            mTrousers = getRandomElement(cmds.ls("SGmTrousers*"))
+            setMaterial(rowGroup + ' | ' + s + '|body|l_leg', mTrousers)
+            setMaterial(rowGroup + ' | ' + s + '|body|r_leg', mTrousers)
+
+            mSkinFace = cmds.ls("SGmSkinFace*")
+            mSkinFace = getRandomElement(mSkinFace)
+            setMaterial(rowGroup + ' | ' + s + '|body|head', mSkinFace)
+
+            mSkin = getSkinMaterial(mSkinFace) + "SG"
+            setMaterial(rowGroup + ' | ' + s + '|body|r_arm|r_hand', mSkin)
+            setMaterial(rowGroup + ' | ' + s + '|body|l_arm|l_hand', mSkin)
+            
+            # TODO valutare se provare a cambiare capigliatura
+
+            cmds.select (rowGroup + ' | ' + s)
+
+
+
+# Funzione che importa i vari modelli
+def importModels(model, folder, ns):    # ns: namespace
     for item in model:
         fname = os.path.join(folder, item)
         objName, ext = os.path.splitext(os.path.basename(fname))
         # import each file
         imported_objects = cmds.file(fname, i=True, rnn=True, mergeNamespacesOnClash =False, namespace=ns, loadReferenceDepth='all', importFrameRate=True, type='mayaBinary') 
-        transforms.append (cmds.ls(imported_objects, type='transform'))
 
 """
 Delete objects if exists
@@ -221,6 +273,10 @@ def drawModels (nRows, nSeats):
             setMaterial(rowGroup + ' | ' + body + '|body|head', mSkinFace)
             uvMapskinFace(rowGroup,body)
 
+            mSkin = getSkinMaterial(mSkinFace) + "SG"
+            setMaterial(rowGroup + ' | ' + body + '|body|r_arm|r_hand', mSkin)
+            setMaterial(rowGroup + ' | ' + body + '|body|l_arm|l_hand', mSkin)
+
             hairName = getRandomElement(hairList)
             hair = cmds.duplicate (hairName, name = "hair#") [0]
             cmds.parent(hair, rowGroup + ' | ' + body)
@@ -232,7 +288,6 @@ def drawModels (nRows, nSeats):
             mHair = getRandomElement(mHair)
             setMaterial(rowGroup + ' | ' + body + '|body|head|hair*' ,mHair)
 
-            #rigReference = 'viewer_' + str(count+1) + "|QuickRigCharacter_Ctrl_Reference"
             cmds.parentConstraint ("viewer_" + str(count+1) + "|joint_COG|joint_spine|joint_neck", rowGroup + ' | ' + body + '|body|head|hair*', maintainOffset = True, weight = True)
 
             selectRig('viewer_' + str(count+1)) # Si seleziona il Rig in quanto selezionando il gruppo lo spostamento viene male
@@ -277,6 +332,12 @@ def uvMapskinFace(rowGroup, body):
     cmds.polyEditUV( uValue=0, vValue=0.34) 
     cmds.setAttr (rowGroup + ' | ' + body + '|body|head|headShape.uvPivot',0.5, 0.45, type='double2')
     cmds.polyEditUV(pivotU = 0.5, pivotV = 0.45, scaleU=3.5, scaleV=3.5)
+
+def getSkinMaterial(material):
+    cmds.select("mLayer" + material[3:], visible = False)
+    mSkin = pm.defaultNavigation(defaultTraversal=True, destination= "mLayer" + material[3:] + ".inputs[1].color")
+    return mSkin[0]
+
 
 """
 Select rig of path model
@@ -336,9 +397,32 @@ file -import -type "atomImport" -ra true -namespace "anim" -options ";;targetTim
 file -import -type "atomImport" -ra true -namespace "anim_row_group01" -options ";;targetTime=3;option=insert;match=hierarchy;;selected=selectedOnly;search=;replace=;prefix=;suffix=;mapFile=/Users/aleclock/Documents/maya/projects/default/data/;" "/Users/aleclock/Desktop/uni/ModGraf/crowdGenerator/src/anim_row_group01.atom";
 """
 def setAnimation(viewer, anim_name):
-    print (anim_name)
     selectIkHandle(viewer)
     cmds.file(anim_name, type = "atomImport" , i= True, renameAll= True, namespace = ":", op =";;targetTime=3;option=insert;match=hierarchy;;selected=selectedOnly;search=;replace=;prefix=;suffix=;mapFile=/Users/aleclock/Documents/maya/projects/default/data/;")
+
+"""
+Define a sequence of animation, in order to reduce the possibility of set the same animation to neighboring elements
+Input:
+    animList: animation list 
+    viewerList: viewer list
+Ouput:
+    sequence of animation
+
+L'idea è che, nel caso in cui i modelli da animare siano inferiori del numero di animazioni, venga restituita una lista contenente una sequenza ordinata casualmente 
+di animazioni uniche (nella lista non ci sono doppioni). In caso contrario le animazioni vengono ripetute il meno possibile.
+Questa procedura è perfetta nel caso di pubblico con poche persone, in quanto non ci saranno ripetizioni nelle animazioni
+"""
+def getAnimationSequence(animList, viewerList):
+    if len(viewerList) < len(animList):
+        return random.sample(animList, len(viewerList))
+    else: 
+        anim = []
+        while len(anim) < len(viewerList):
+            if (len(viewerList) - len(anim)) >= len(animList): 
+                anim += random.sample(animList, len(animList))
+            else:
+                anim += random.sample(animList, len(viewerList) - len(anim))
+        return anim
 
 """
 Select animation keys
@@ -352,43 +436,64 @@ Siccome il nome del ikHandle termina con l'indice del viewer meno uno, è necess
 def translateAnimationKeys(viewer, coord):
     index = int(viewer.find('_'))
 
+    footL = pm.keyframe(viewer + "|ikHandle_foot_L", query = True, name = True)
+    footR = pm.keyframe(viewer + "|ikHandle_foot_R", query = True, name = True)
+    handL = pm.keyframe(viewer + "|ikHandle_hand_L", query = True, name = True)
+    handR = pm.keyframe(viewer + "|ikHandle_hand_R", query = True, name = True)
+    head = pm.keyframe(viewer + "|ikHandle_head", query = True, name = True)
+
+    # Nel caso in cui lo stickman sia il primo, ovvero nel caso in cui dopo "_" ci sia solo "1" (i : permettono di discriminare il caso in cui non sia [10, 19])
     if (viewer[index+1:] == "1"):
         name = ""
     else:
         name = str(int(viewer[index+1:]) - 1)
 
     selectIkHandle(viewer)
-    pm.selectKey("ikHandle_foot_L_translateX" + name, addTo = True, keyframe = True)  # https://download.autodesk.com/global/docs/Maya2012/en_US/PyMel/generated/functions/pymel.core.general/pymel.core.general.selectKey.html
-    pm.selectKey("ikHandle_foot_R_translateX" + name, addTo = True, keyframe = True)
-    pm.selectKey("ikHandle_hand_L_translateX" + name, addTo = True, keyframe = True)
-    pm.selectKey("ikHandle_hand_R_translateX" + name, addTo = True, keyframe = True)
-    pm.selectKey("ikHandle_head_translateX" + name, addTo = True, keyframe = True)
+    #pm.selectKey("ikHandle_foot_L_translateX" + name, addTo = True, keyframe = True)  # https://download.autodesk.com/global/docs/Maya2012/en_US/PyMel/generated/functions/pymel.core.general/pymel.core.general.selectKey.html
+    pm.selectKey(footL[0], addTo = True, keyframe = True)
+    pm.selectKey(footR[0], addTo = True, keyframe = True)
+    pm.selectKey(handL[0], addTo = True, keyframe = True)
+    pm.selectKey(handR[0], addTo = True, keyframe = True)
+    pm.selectKey(head[0], addTo = True, keyframe = True)
 
     pm.keyframe(animation = "keys", relative = True, valueChange = (0+ coord[0])) # https://help.autodesk.com/cloudhelp/2018/JPN/Maya-Tech-Docs/PyMel/generated/functions/pymel.core.animation/pymel.core.animation.keyframe.html https://download.autodesk.com/global/docs/maya2012/en_us/PyMel/generated/functions/pymel.core.animation/pymel.core.animation.keyframe.html
 
     pm.selectKey(clear = True)
-    pm.selectKey("ikHandle_foot_L_translateY" + name, addTo = True, keyframe = True)
-    pm.selectKey("ikHandle_foot_R_translateY" + name, addTo = True, keyframe = True)
-    pm.selectKey("ikHandle_hand_L_translateY" + name, addTo = True, keyframe = True)
-    pm.selectKey("ikHandle_hand_R_translateY" + name, addTo = True, keyframe = True)
-    pm.selectKey("ikHandle_head_translateY" + name, addTo = True, keyframe = True)
+    pm.selectKey(footL[1], addTo = True, keyframe = True)
+    pm.selectKey(footR[1], addTo = True, keyframe = True)
+    pm.selectKey(handL[1], addTo = True, keyframe = True)
+    pm.selectKey(handR[1], addTo = True, keyframe = True)
+    pm.selectKey(head[1], addTo = True, keyframe = True)
 
     pm.keyframe(animation = "keys", relative = True, valueChange = (0+ coord[1]))
 
     pm.selectKey(clear = True)
-    pm.selectKey("ikHandle_foot_L_translateZ" + name, addTo = True, keyframe = True)
-    pm.selectKey("ikHandle_foot_R_translateZ" + name, addTo = True, keyframe = True)
-    pm.selectKey("ikHandle_hand_L_translateZ" + name, addTo = True, keyframe = True)
-    pm.selectKey("ikHandle_hand_R_translateZ" + name, addTo = True, keyframe = True)
-    pm.selectKey("ikHandle_head_translateZ" + name, addTo = True, keyframe = True)
+    pm.selectKey(footL[2], addTo = True, keyframe = True)
+    pm.selectKey(footR[2], addTo = True, keyframe = True)
+    pm.selectKey(handL[2], addTo = True, keyframe = True)
+    pm.selectKey(handR[2], addTo = True, keyframe = True)
+    pm.selectKey(head[2], addTo = True, keyframe = True)
 
     pm.keyframe(animation = "keys", relative = True, valueChange = (0+ coord[2]))
-    
-    # TODO magar provare a traslare rispetto alla media tra la posizione del piede sinistro e destro
 
+
+"""
+Calculate stickman center position
+Input:
+    viewer: stickman
+Output:
+    list: [coordX, coordY, coordZ]
+"""
+def getStickmanOrigin(viewer):
+    coordLeft = getLeftFootCoord(viewer)
+    coordRight = getRightFootCoord(viewer)
+    return [(l + r) / 2 for l, r in zip(coordLeft, coordRight)]
 
 """
 pm.getAttr('noseCone.translateX',lock=True)
 """
 def getLeftFootCoord(viewer):
     return [pm.getAttr(viewer + "|ikHandle_foot_L.translateX"), pm.getAttr(viewer + "|ikHandle_foot_L.translateY"), pm.getAttr(viewer + "|ikHandle_foot_L.translateZ")]
+
+def getRightFootCoord(viewer):
+    return [pm.getAttr(viewer + "|ikHandle_foot_R.translateX"), pm.getAttr(viewer + "|ikHandle_foot_R.translateY"), pm.getAttr(viewer + "|ikHandle_foot_R.translateZ")]

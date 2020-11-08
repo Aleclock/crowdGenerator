@@ -19,15 +19,7 @@ def createUI( windowTitle, pApplyCallback ):
     # Callback per il caricamento dei materiali
     def loadMaterialsCallback( *pArgs ):
         cmds.file("./src/material/SGmComplete.mb", type='mayaBinary', i= True, renameAll= True, mergeNamespacesOnClash=True, namespace=":", loadReferenceDepth= "all", importFrameRate= True, importTimeRange="override")
-        """cmds.file("./src/material/SGmSkinFace.mb", type='mayaBinary', i= True, renameAll= True, mergeNamespacesOnClash=True, namespace=":", loadReferenceDepth= "all", importFrameRate= True, importTimeRange="override")
-        cmds.file("./src/material/SGmHair00_08.mb", type='mayaBinary', i= True, renameAll= True, mergeNamespacesOnClash=True, namespace=":", loadReferenceDepth= "all", importFrameRate= True, importTimeRange="override")
-        cmds.file("./src/material/SGmBody_Tee00_07.mb", type='mayaBinary', i= True, renameAll= True, mergeNamespacesOnClash=True, namespace=":", loadReferenceDepth= "all", importFrameRate= True, importTimeRange="override")
-        cmds.file("./src/material/SGmBody_Shirt00_12.mb", type='mayaBinary', i= True, renameAll= True, mergeNamespacesOnClash=True, namespace=":", loadReferenceDepth= "all", importFrameRate= True, importTimeRange="override")
-        cmds.file("./src/material/SGmBody_sweater00_04.mb", type='mayaBinary', i= True, renameAll= True, mergeNamespacesOnClash=True, namespace=":", loadReferenceDepth= "all", importFrameRate= True, importTimeRange="override")
-        cmds.file("./src/material/SGmTrousers_jeans00_03.mb", type='mayaBinary', i= True, renameAll= True, mergeNamespacesOnClash=True, namespace=":", loadReferenceDepth= "all", importFrameRate= True, importTimeRange="override")
-        cmds.file("./src/material/SGmTrousers_standard00_04.mb", type='mayaBinary', i= True, renameAll= True, mergeNamespacesOnClash=True, namespace=":", loadReferenceDepth= "all", importFrameRate= True, importTimeRange="override")
-        cmds.file("./src/material/SGmTrousers_velvet00_05.mb", type='mayaBinary', i= True, renameAll= True, mergeNamespacesOnClash=True, namespace=":", loadReferenceDepth= "all", importFrameRate= True, importTimeRange="override")"""
-
+    
         # Callback per la rimozione dei materiali
     def deleteMaterialsCallback( *pArgs ):
         #TODO eliminare quelli giusti
@@ -45,7 +37,7 @@ def createUI( windowTitle, pApplyCallback ):
         folderHair  = r"./src/hair"
         fileType = "mb"
 
-        baseModel = cmds.getFileList(folder = folderPerson, filespec = "person_newModel.%s" % fileType)
+        baseModel = cmds.getFileList(folder = folderPerson, filespec = "person_model.%s" % fileType)
         haircutModel = cmds.getFileList(folder = folderHair, filespec = "haircut*.%s" % fileType)
         
         # Delete existing models

@@ -66,7 +66,7 @@ def createUI( windowTitle, pApplyCallback ):
         deleteElements("row_group*")
         deleteElements("hair*")
         
-    with pm.window(title= windowTitle ,sizeable=True):
+    with pm.window(title= windowTitle ,sizeable=False):
         with pm.rowColumnLayout():
             with pm.frameLayout(label='Crowd creation', font = "boldLabelFont"):
                 with pm.rowColumnLayout(numberOfColumns=5, columnWidth=[(1,10),(2, 60), (3, 60), (4, 60),(5,10)]):
@@ -121,15 +121,19 @@ def createUI( windowTitle, pApplyCallback ):
                 with pm.rowColumnLayout(numberOfColumns=3, columnWidth=[(1,10),(2, 180), (3,10)]):
                     addSeparator(4, 10)
                     pm.text('Select item to change and click the action', wordWrap = True, align='left')
+                    addSeparator(5, 10)
+            
+                    alertButton = cmds.text (label = "", wordWrap = True, align='center', font = "boldLabelFont")
                 with pm.rowColumnLayout(numberOfColumns=4, columnWidth=[(1,40),(2, 60), (3, 60),(4,40)]):
                     addSeparator(4, 10)
                     
                     cmds.separator(h=10, style="none")
                     cmds.text (label = "Stickman")
-                    cmds.button (label = "Change", command= changeViewerCallback )
+                    #cmds.button (label = "Change", command= changeViewerCallback )
+                    cmds.button (label = "Change", command = functools.partial ( changeViewerCallback, alertButton))
                     addSeparator(2, 10)
                     cmds.text (label = "Animation")
-                    cmds.button (label = "Change", command= changeAnimationCallback )
+                    cmds.button (label = "Change", command= functools.partial ( changeAnimationCallback, alertButton))
                     cmds.separator(h=10, style="none")
                     
                     addSeparator(4,10)
@@ -162,14 +166,15 @@ def animExultanceCallback(*pArgs):
 """
 cutKey -clear -time ":" -hierarchy none -controlPoints 0 -shape 1 {"viewer_4|ikHandle_foot_L", "viewer_4|ikHandle_hand_L", "viewer_4|ikHandle_hand_R", "viewer_4|ikHandle_head", "viewer_4|ikHandle_foot_R"};
 """
-def changeAnimationCallback(*pArgs):
+def changeAnimationCallback(button, *pArgs):
     fileType = "atom"
     anim_folder  = r"./src/animation"
     animList = cmds.getFileList(folder = anim_folder, filespec = "*.%s" % fileType) # list of animation files 
 
     selected = cmds.ls (selection = True) # Selected items
     for s in selected:
-        if s[0:6] == "viewer": # if the item selected can be animated
+        if s[0:6] == "viewer" and "|" not in s: # if the item selected can be animated
+            pm.text(button, label="", edit = True )
             rowGroup = pm.listRelatives(s, allParents = True)[0] # Take the first (and unique) element
             coord = getStickmanOrigin(s)
             
@@ -181,11 +186,14 @@ def changeAnimationCallback(*pArgs):
 
             translateAnimationKeys(s, coord)
             cmds.select (rowGroup + ' | ' + s)
+        else:
+            pm.text(button, label="ATTENTION: <br/>Please select viewer's to modify", edit = True )
 
-def changeViewerCallback(*pArgs):
+def changeViewerCallback(button, *pArgs):
     selected = cmds.ls (selection = True) # Selected items
     for s in selected:
-        if s[0:6] == "viewer": # if the item selected can be animated
+        if s[0:6] == "viewer" and "|" not in s: # if the item selected can be animated
+            pm.text(button, label="", edit = True )
             # https://help.autodesk.com/cloudhelp/2016/ENU/Maya-Tech-Docs/PyMel/generated/classes/pymel.core.nodetypes/pymel.core.nodetypes.DagNode.html
             rowGroup = pm.listRelatives(s, allParents = True)[0] # Take the first (and unique) element
 
@@ -204,9 +212,25 @@ def changeViewerCallback(*pArgs):
             setMaterial(rowGroup + ' | ' + s + '|body|r_arm|r_hand', mSkin)
             setMaterial(rowGroup + ' | ' + s + '|body|l_arm|l_hand', mSkin)
             
-            # TODO valutare se provare a cambiare capigliatura
+            hairList = cmds.ls("hairstyle*")
+            hairName = getRandomElement(hairList)
+            hair = cmds.duplicate (hairName, name = "hair#") [0]
+            hairCoord = pm.getAttr(rowGroup + ' | ' + s + '|body|head|hair*' + ".translate")
+            cmds.parent(hair, rowGroup + ' | ' + s)
+            cmds.select (rowGroup + ' | ' + s + '|body|head|hair*')
+            cmds.select (rowGroup + ' | ' + s + '|' + hair ,add = True)
+            pm.runtime.ReplaceObjects(scale = False)
+
+            # Necessario in quanto altrimenti verrebbe traslato di un minimo (ReplaceObjects non mantiene perfettamente le coordinate precedenti)
+            pm.setAttr( rowGroup + ' | ' + s + "|body|head|hair*" + ".translateX", hairCoord[0])
+            pm.setAttr( rowGroup + ' | ' + s + "|body|head|hair*" + ".translateY", hairCoord[1])
+            pm.setAttr( rowGroup + ' | ' + s + "|body|head|hair*" + ".translateZ", hairCoord[2])
+
+            cmds.parentConstraint (s + "|joint_COG|joint_spine|joint_neck", rowGroup + ' | ' + s + '|body|head|hair*', maintainOffset = True, weight = True)
 
             cmds.select (rowGroup + ' | ' + s)
+        else:
+            pm.text(button, label="ATTENTION: <br/>Please select viewer's to modify", edit = True )
 
 
 

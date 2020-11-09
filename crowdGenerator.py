@@ -177,7 +177,8 @@ def changeAnimationCallback(button, *pArgs):
             #print (pm.keyframe(s + "|ikHandle_foot_L", query = True, name = True))
 
             translateAnimationKeys(s, coord)
-            cmds.select (rowGroup + ' | ' + s)
+            #cmds.select (rowGroup + ' | ' + s)
+            cmds.select (selected)
         else:
             pm.text(button, label="ATTENTION: <br/>Please select viewer's to modify", edit = True )
 
@@ -218,9 +219,14 @@ def changeViewerCallback(button, *pArgs):
             pm.setAttr( rowGroup + ' | ' + s + "|body|head|hair*" + ".translateY", hairCoord[1])
             pm.setAttr( rowGroup + ' | ' + s + "|body|head|hair*" + ".translateZ", hairCoord[2])
 
+            mHair = cmds.ls("SGmHair*")
+            mHair = getRandomElement(mHair)
+            setMaterial(rowGroup + ' | ' + s + '|body|head|hair*' ,mHair)
+
             cmds.parentConstraint (s + "|joint_COG|joint_spine|joint_neck", rowGroup + ' | ' + s + '|body|head|hair*', maintainOffset = True, weight = True)
 
-            cmds.select (rowGroup + ' | ' + s)
+            #cmds.select (rowGroup + ' | ' + s)
+            cmds.select (selected)
         else:
             pm.text(button, label="ATTENTION: <br/>Please select viewer's to modify", edit = True )
 

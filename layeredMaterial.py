@@ -44,10 +44,10 @@ cmds.defaultNavigation(connectToExisting=True, force = True, source= shader + '.
 # ---- blinnMaterial
 blinnShader = cmds.shadingNode('blinn', asShader= True, name='mSkin')
 blinnShaderGroup = cmds.sets(blinnShader, renderable= True, noSurfaceShader= True, empty= True, name= "blinn1SG")
-cmds.connectAttr(blinnShader + '.outColor',blinnShaderGroup + '.surfaceShader')
+cmds.connectAttr(blinnShader + '.outColor', blinnShaderGroup + '.surfaceShader')
 
  
-cmds.connectAttr(layered + '.outColor',blinnShader + '.color')
+cmds.connectAttr(layered + '.outColor', blinnShader + '.color')
 
 cmds.select( 'head', r= True ) 
 cmds.sets(forceElement = blinnShaderGroup)

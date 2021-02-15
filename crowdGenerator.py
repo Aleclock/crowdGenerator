@@ -16,13 +16,13 @@ def createUI( windowTitle, pApplyCallback ):
     if cmds.window( windowID, exists=True ):
         cmds.deleteUI( windowID )
 
-    # Callback per il caricamento dei materiali
+    # Callback - Loading materials
     def loadMaterialsCallback( *pArgs ):
-        cmds.file("./src/material/SGmComplete.mb", type='mayaBinary', i= True, renameAll= True, mergeNamespacesOnClash=True, namespace=":", loadReferenceDepth= "all", importFrameRate= True, importTimeRange="override")
-    
-        # Callback per la rimozione dei materiali
+        cmds.file("./src/material/SGmComplete_try.mb", type='mayaBinary', i= True, renameAll= True, mergeNamespacesOnClash=True, namespace=":", loadReferenceDepth= "all", importFrameRate= True, importTimeRange="override")
+
+
+    # Callback - Removing materials
     def deleteMaterialsCallback( *pArgs ):
-        #TODO eliminare quelli giusti
         deleteElements("faceTexture*")
         deleteElements("mSkin*")
         deleteElements("mSkinFace*")
@@ -30,7 +30,7 @@ def createUI( windowTitle, pApplyCallback ):
         deleteElements("trousers_velvet*")
         deleteElements("place2dTexture*")
     
-    # Callback per il caricamento dei modelli
+    # Callback - Loading models (body, haircut)
     def loadModelsCallback( *pArgs ):
         # Variabili per l'import del modello
         folderPerson = r"./src"
@@ -51,7 +51,7 @@ def createUI( windowTitle, pApplyCallback ):
         importModels(baseModel, folderPerson,'stickman')
         cmds.parent(cmds.ls("*:person*"),'models')
     
-    # Callback per la rimozione dei modelli
+    # Callback - Removing models
     def deleteModelsCallback( *pArgs ):
         deleteElements("*:person")
         deleteElements("models")
@@ -131,12 +131,11 @@ def createUI( windowTitle, pApplyCallback ):
                     addSeparator(4,10)
                     cmds.setParent( '..' )
 
-# Callback per la creazione della folla 
+# Callback - Crowd creation
 def applyCallback(nRowsField, nSeatsField, *pArgs):
     nRows = cmds.intField (nRowsField, query =  True, value = True)
     nSeats = cmds.intField (nSeatsField, query =  True, value = True)
     deleteElements("row_group*")
-    #TODO capire perchè elimino i capelli
     deleteElements("hair_*")
     drawModels(nRows, nSeats)
 
@@ -174,10 +173,7 @@ def changeAnimationCallback(button, *pArgs):
             pm.cutKey( {s + "|ikHandle_foot_L",s + "|ikHandle_hand_L",s + "|ikHandle_hand_R",s + "|ikHandle_head",s + "|ikHandle_foot_R"}, time=":", clear = True, hierarchy = "none", controlPoints = False, shape = True)
             
             setAnimation(s, anim_folder + "/" + str(getRandomElement(animList)))
-            #print (pm.keyframe(s + "|ikHandle_foot_L", query = True, name = True))
-
             translateAnimationKeys(s, coord)
-            #cmds.select (rowGroup + ' | ' + s)
             cmds.select (selected)
         else:
             pm.text(button, label="ATTENTION: <br/>Please select viewer's to modify", edit = True )
@@ -232,8 +228,14 @@ def changeViewerCallback(button, *pArgs):
 
 
 
-# Funzione che importa i vari modelli
-def importModels(model, folder, ns):    # ns: namespace
+"""
+Import models
+Input:
+    model
+    folder
+    ns: namespace 
+"""
+def importModels(model, folder, ns): 
     for item in model:
         fname = os.path.join(folder, item)
         objName, ext = os.path.splitext(os.path.basename(fname))
@@ -250,11 +252,9 @@ def deleteElements(el):
     if len(bodyList)>0:
         cmds.delete(bodyList)
 
-# Funzione che elimina materiali se già esistenti
+
 """
 Delete materials if exists
-Input:
-    
 """
 def deleteMaterials():
     skinList = cmds.ls("skin*")
@@ -262,7 +262,12 @@ def deleteMaterials():
         cmds.delete(skinList)
         skinList = []
 
-# Add multiple separator
+"""
+Add UI separator
+Input:
+    n: number of separator
+    h: height of single separator
+"""
 def addSeparator(n, height):
     for _ in range(n):
         cmds.separator(h=height, style="none")
